@@ -1,6 +1,7 @@
-`timescale 1ns / 1ps
-
-module axis_transfer (
+module axis_transfer #(
+    parameter WIDTH  = 20,
+    parameter HEIGHT = 20
+) (
     input logic aclk,
     input logic aresetn,
 
@@ -11,59 +12,66 @@ module axis_transfer (
     output logic        m_axis_tlast
 );
 
+  logic [ 4:0] x;
+  logic [ 4:0] y;
+
+  logic [31:0] color;
+
+  gradient #(
+      .WIDTH (WIDTH),
+      .HEIGHT(HEIGHT)
+  ) gradient_mod (
+      .x(x),
+      .y(y),
+      .pixel(color),
+      .clipping()
+  );
+
   // Define states with explicit encoding (optional)
-  typedef enum logic [1:0] {
-    IDLE      = 2'b00,
-    SEND_DATA = 2'b01,
-    SEND_LAST = 2'b10
+  typedef enum logic {
+    IDLE,
+    SEND_DATA
   } state_t;
 
-  // Use _q for current state, _d for next state (common convention)
-  state_t state_q, state_d;
+  state_t state;
+  always_ff @(posedge aclk) begin
+    m_axis_tvalid <= 1'b0;
+    m_axis_tlast  <= 1'b0;
 
-  // Sequential logic for state transitions
-  always_ff @(posedge aclk or negedge aresetn) begin
     if (!aresetn) begin
-      state_q <= IDLE;
+      state <= IDLE;
+      x <= 0;
+      y <= 0;
+      m_axis_tdata <= 0;
     end else begin
-      state_q <= state_d;
+      // State transitions and output assignments
+      case (state)
+        IDLE: begin
+          state <= SEND_DATA;
+        end
+
+        SEND_DATA: begin
+          m_axis_tvalid <= 1'b1;
+          m_axis_tdata  <= color;
+
+          // Index Incrementing
+          if (x == WIDTH - 1) begin
+            x <= 0;
+            y <= y + 1;
+          end else x <= x + 1;
+
+          if (x == WIDTH - 1 && y == HEIGHT - 1) begin
+            m_axis_tlast <= 1'b1;
+            state <= IDLE;
+          end
+        end
+
+        // Optional: handle unexpected states
+        default: begin
+          state <= IDLE;
+        end
+      endcase
     end
-  end
-
-  // Combinational logic for next state and outputs
-  always_comb begin
-    // Default assignments (helps avoid latches)
-    state_d = state_q;
-    m_axis_tvalid = 1'b0;
-    m_axis_tlast = 1'b0;
-    m_axis_tdata = 32'hDEADBEEF;
-
-    // State transitions and output assignments
-    case (state_q)
-      IDLE: begin
-        state_d = SEND_DATA;
-      end
-
-      SEND_DATA: begin
-        m_axis_tvalid = 1'b1;
-        if (m_axis_tready) begin
-          state_d = SEND_LAST;
-        end
-      end
-
-      SEND_LAST: begin
-        m_axis_tvalid = 1'b1;
-        m_axis_tlast  = 1'b1;
-        if (m_axis_tready) begin
-          state_d = IDLE;
-        end
-      end
-
-      // Optional: handle unexpected states
-      default: begin
-        state_d = IDLE;
-      end
-    endcase
   end
 
 endmodule
