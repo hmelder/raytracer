@@ -40,3 +40,8 @@ add_test(
   NAME Vresize_down_test
   COMMAND $<TARGET_FILE:Vresize_down_test>
 )
+
+add_test(
+  NAME Vufp_mul_test
+  COMMAND $<TARGET_FILE:Vufp_mul_test>
+)
