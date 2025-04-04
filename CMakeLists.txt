@@ -14,33 +14,9 @@ option(DEMOS "Enable building of demos" ON)
 # Enable testing
 enable_testing()
 
-
-function(add_verilated_test TEST_NAME SV_SRC CC_SRC TOP_MODULE_NAME)
-  # Extract include directories from fp_core_sv target
-  get_target_property(fp_core_includes fp_core_sv INTERFACE_INCLUDE_DIRECTORIES)
-  get_target_property(fp_core_sources  fp_core_sv INTERFACE_SOURCES)
-
-  add_executable(${TEST_NAME} ${CC_SRC})
-  target_link_libraries(${TEST_NAME} PRIVATE PkgConfig::gtest_main)
-
-  verilate(${TEST_NAME}
-    SOURCES
-      ${SV_SRC}
-      ${fp_core_sources}
-    INCLUDE_DIRS
-      ${fp_core_includes}
-    TOP_MODULE
-      ${TOP_MODULE_NAME}
-  )
-
-  add_test(
-    NAME ${TEST_NAME}
-    COMMAND $<TARGET_FILE:${TEST_NAME}>
-  )
-endfunction()
-
 # Add component
 add_subdirectory(hw/math/fp_core) # Exposes fp_core_sv
+add_subdirectory(hw/math/fp_vec) # Exposes fp_vec_sv
 
 if (DEMOS)
 add_subdirectory(hw/demos/axis_transfer)

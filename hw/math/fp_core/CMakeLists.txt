@@ -8,6 +8,7 @@ target_sources(fp_core_sv INTERFACE
   ${CMAKE_CURRENT_SOURCE_DIR}/sfp_add_full.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/sfp_if.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/sfp_mul.sv
+  ${CMAKE_CURRENT_SOURCE_DIR}/sfp_mul_full.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/sfp_resize.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/sfp_sub.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/sfp_sub_full.sv

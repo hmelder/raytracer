@@ -6,6 +6,26 @@ pkg_check_modules(gtest_main REQUIRED IMPORTED_TARGET gtest_main)
 get_target_property(fp_core_includes fp_core_sv INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(fp_core_sources  fp_core_sv INTERFACE_SOURCES)
 
+function(add_verilated_test TEST_NAME SV_SRC CC_SRC TOP_MODULE_NAME)
+  add_executable(${TEST_NAME} ${CC_SRC})
+  target_link_libraries(${TEST_NAME} PRIVATE PkgConfig::gtest_main)
+
+  verilate(${TEST_NAME}
+    SOURCES
+      ${SV_SRC}
+      ${fp_core_sources}
+    INCLUDE_DIRS
+      ${fp_core_includes}
+    TOP_MODULE
+      ${TOP_MODULE_NAME}
+  )
+
+  add_test(
+    NAME ${TEST_NAME}
+    COMMAND $<TARGET_FILE:${TEST_NAME}>
+  )
+endfunction()
+
 add_verilated_test(Vclip_unsigned_test
   ${CMAKE_CURRENT_SOURCE_DIR}/clip_unsigned_wrapper.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/clip_unsigned_test.cc

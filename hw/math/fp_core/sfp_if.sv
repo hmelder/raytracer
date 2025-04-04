@@ -9,8 +9,8 @@ interface sfp_if #(
     localparam int unsigned WL = IW + QW  // total number of bits
 ) ();
   logic signed [WL-1:0] val;  // holds the fixed point scaler
-  localparam int IsSigned = 1;
 
   modport out(output val);
   modport in(input val);
+
 endinterface
