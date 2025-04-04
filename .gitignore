@@ -34,3 +34,4 @@
 # Project-specfic objects
 build/
 .cache/
+*.vcd
