@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2024 Hugo Melder
 
-#include <cstddef>
 #include <cstdint>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
