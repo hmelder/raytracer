@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2024 Hugo Melder
 
-module clipping_test #(
+module clip_unsigned_wrapper #(
 ) (
     input [31:0] in,
     output [15:0] out,

@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include "Vclipping_test.h"
+#include "Vclip_unsigned_wrapper.h"
 #include "gtest/gtest.h"
 
 namespace {
@@ -14,7 +14,8 @@ namespace {
 class ClippingTest : public testing::Test {};
 
 TEST_F(ClippingTest, max_minus_one) {
-  std::unique_ptr<Vclipping_test> clipping = std::make_unique<Vclipping_test>();
+  std::unique_ptr<Vclip_unsigned_wrapper> clipping =
+      std::make_unique<Vclip_unsigned_wrapper>();
   clipping->in = 0xFFFE;
   clipping->eval();
   EXPECT_EQ(clipping->out, 0xFFFE);
@@ -22,7 +23,8 @@ TEST_F(ClippingTest, max_minus_one) {
 }
 
 TEST_F(ClippingTest, min_value) {
-  std::unique_ptr<Vclipping_test> clipping = std::make_unique<Vclipping_test>();
+  std::unique_ptr<Vclip_unsigned_wrapper> clipping =
+      std::make_unique<Vclip_unsigned_wrapper>();
   clipping->in = 0x0000;
   clipping->eval();
   EXPECT_EQ(clipping->out, 0x0000);
@@ -30,7 +32,8 @@ TEST_F(ClippingTest, min_value) {
 }
 
 TEST_F(ClippingTest, max_value) {
-  std::unique_ptr<Vclipping_test> clipping = std::make_unique<Vclipping_test>();
+  std::unique_ptr<Vclip_unsigned_wrapper> clipping =
+      std::make_unique<Vclip_unsigned_wrapper>();
   clipping->in = (1 << 20) - 1; // Assuming INW=20
   clipping->eval();
   EXPECT_EQ(clipping->out, 0xFFFF); // OUTW=16
@@ -38,7 +41,8 @@ TEST_F(ClippingTest, max_value) {
 }
 
 TEST_F(ClippingTest, first_clipped_value) {
-  std::unique_ptr<Vclipping_test> clipping = std::make_unique<Vclipping_test>();
+  std::unique_ptr<Vclip_unsigned_wrapper> clipping =
+      std::make_unique<Vclip_unsigned_wrapper>();
   clipping->in = 0x10000; // First value exceeding 16-bit
   clipping->eval();
   EXPECT_EQ(clipping->out, 0xFFFF);
@@ -46,7 +50,8 @@ TEST_F(ClippingTest, first_clipped_value) {
 }
 
 TEST_F(ClippingTest, first_non_clipped_value) {
-  std::unique_ptr<Vclipping_test> clipping = std::make_unique<Vclipping_test>();
+  std::unique_ptr<Vclip_unsigned_wrapper> clipping =
+      std::make_unique<Vclip_unsigned_wrapper>();
   clipping->in = 0xFFFF; // Largest 16-bit value
   clipping->eval();
   EXPECT_EQ(clipping->out, 0xFFFF);
@@ -54,7 +59,8 @@ TEST_F(ClippingTest, first_non_clipped_value) {
 }
 
 TEST_F(ClippingTest, midrange_clipped_value) {
-  std::unique_ptr<Vclipping_test> clipping = std::make_unique<Vclipping_test>();
+  std::unique_ptr<Vclip_unsigned_wrapper> clipping =
+      std::make_unique<Vclip_unsigned_wrapper>();
   clipping->in = 0x18000; // Well into the clipped range
   clipping->eval();
   EXPECT_EQ(clipping->out, 0xFFFF);

@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2024 Hugo Melder
 
@@ -8,7 +7,7 @@
 
 #include <memory>
 
-#include "Vufp_mul_test.h"
+#include "Vufp_mul_wrapper.h"
 #include "gtest/gtest.h"
 
 static const uint32_t basic_lerp[] = {
@@ -76,7 +75,7 @@ namespace {
 class UfpMulTest : public testing::Test {};
 
 TEST_F(UfpMulTest, OutOfRange) {
-  std::unique_ptr<Vufp_mul_test> mul = std::make_unique<Vufp_mul_test>();
+  std::unique_ptr<Vufp_mul_wrapper> mul = std::make_unique<Vufp_mul_wrapper>();
 
   mul->x = 0x20000;
   mul->y = 0x80000000;
@@ -88,7 +87,7 @@ TEST_F(UfpMulTest, OutOfRange) {
 }
 
 TEST_F(UfpMulTest, InRange) {
-  std::unique_ptr<Vufp_mul_test> mul = std::make_unique<Vufp_mul_test>();
+  std::unique_ptr<Vufp_mul_wrapper> mul = std::make_unique<Vufp_mul_wrapper>();
 
   mul->x = 0x20000;
   mul->y = 0x70000000;
@@ -100,7 +99,7 @@ TEST_F(UfpMulTest, InRange) {
 }
 
 TEST_F(UfpMulTest, ZeroMulZero) {
-  std::unique_ptr<Vufp_mul_test> mul = std::make_unique<Vufp_mul_test>();
+  std::unique_ptr<Vufp_mul_wrapper> mul = std::make_unique<Vufp_mul_wrapper>();
   mul->x = 0;
   mul->y = 0;
   mul->should_clip = 0;
@@ -111,7 +110,7 @@ TEST_F(UfpMulTest, ZeroMulZero) {
 }
 
 TEST_F(UfpMulTest, ZeroMulMax) {
-  std::unique_ptr<Vufp_mul_test> mul = std::make_unique<Vufp_mul_test>();
+  std::unique_ptr<Vufp_mul_wrapper> mul = std::make_unique<Vufp_mul_wrapper>();
   mul->x = 0;
   mul->y = 0xFFFFFFFF;
   mul->should_clip = 0;
@@ -122,7 +121,7 @@ TEST_F(UfpMulTest, ZeroMulMax) {
 }
 
 TEST_F(UfpMulTest, OneMulOne) {
-  std::unique_ptr<Vufp_mul_test> mul = std::make_unique<Vufp_mul_test>();
+  std::unique_ptr<Vufp_mul_wrapper> mul = std::make_unique<Vufp_mul_wrapper>();
   mul->x = 0x00010000; // 1.0 in Q16.16
   mul->y = 0x00010000; // 1.0 in Q16.16
   mul->should_clip = 0;
@@ -133,7 +132,7 @@ TEST_F(UfpMulTest, OneMulOne) {
 }
 
 TEST_F(UfpMulTest, UnderflowTest) {
-  std::unique_ptr<Vufp_mul_test> mul = std::make_unique<Vufp_mul_test>();
+  std::unique_ptr<Vufp_mul_wrapper> mul = std::make_unique<Vufp_mul_wrapper>();
   mul->x = 0x00000001; // smallest positive value
   mul->y = 0x00000001;
   mul->should_clip = 0;
@@ -175,7 +174,7 @@ TEST_F(UfpMulTest, UnderflowTest) {
  *   Error: 0,0006347412
  */
 TEST_F(UfpMulTest, Lerp) {
-  std::unique_ptr<Vufp_mul_test> mul = std::make_unique<Vufp_mul_test>();
+  std::unique_ptr<Vufp_mul_wrapper> mul = std::make_unique<Vufp_mul_wrapper>();
 
   const int WIDTH = 400;
   const int WIDTH_INV = 0x000000a4;

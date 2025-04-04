@@ -1,4 +1,4 @@
-module ufp_mul_test (
+module ufp_mul_wrapper (
     input logic [31:0] x,
     input logic [31:0] y,
     input should_clip,

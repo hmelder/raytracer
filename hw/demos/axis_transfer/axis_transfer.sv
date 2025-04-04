@@ -54,15 +54,17 @@ module axis_transfer #(
           m_axis_tvalid <= 1'b1;
           m_axis_tdata  <= color;
 
-          // Index Incrementing
-          if (x == WIDTH - 1) begin
-            x <= 0;
-            y <= y + 1;
-          end else x <= x + 1;
+          if (m_axis_tready) begin
+            // Index Incrementing
+            if (x == WIDTH - 1) begin
+              x <= 0;
+              y <= y + 1;
+            end else x <= x + 1;
 
-          if (x == WIDTH - 1 && y == HEIGHT - 1) begin
-            m_axis_tlast <= 1'b1;
-            state <= IDLE;
+            if (x == WIDTH - 1 && y == HEIGHT - 1) begin
+              m_axis_tlast <= 1'b1;
+              state <= IDLE;
+            end
           end
         end
 
