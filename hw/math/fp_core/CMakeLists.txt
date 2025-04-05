@@ -23,6 +23,8 @@ target_include_directories(fp_core_sv INTERFACE
   ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
-if(TESTS)
+option(FP_CORE_TESTS "Enable building of fp_core tests" OFF)
+
+if(FP_CORE_TESTS)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif()
