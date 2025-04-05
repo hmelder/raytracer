@@ -12,7 +12,6 @@ target_sources(fp_core_sv INTERFACE
   ${CMAKE_CURRENT_SOURCE_DIR}/sfp_resize.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/sfp_sub.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/sfp_sub_full.sv
-  ${CMAKE_CURRENT_SOURCE_DIR}/ufp_from_real.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/ufp_if.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/ufp_mul.sv
   ${CMAKE_CURRENT_SOURCE_DIR}/ufp_resize.sv
