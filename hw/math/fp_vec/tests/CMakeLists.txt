@@ -47,3 +47,9 @@ add_verilated_test(Vsfp_vec_add_s
   ${CMAKE_CURRENT_SOURCE_DIR}/sfp_vec_add_s_test.cc
   sfp_vec_add_s_wrapper
 )
+
+add_verilated_test(Vsfp_vec_lerp
+  ${CMAKE_CURRENT_SOURCE_DIR}/sfp_vec_lerp_wrapper.sv
+  ${CMAKE_CURRENT_SOURCE_DIR}/sfp_vec_lerp_test.cc
+  sfp_vec_lerp_wrapper
+)

@@ -6,6 +6,8 @@ target_sources(fp_vec_sv INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/sfp_vec_mul.sv
     ${CMAKE_CURRENT_SOURCE_DIR}/sfp_vec_mul_s.sv
     ${CMAKE_CURRENT_SOURCE_DIR}/sfp_vec_sub.sv
+    ${CMAKE_CURRENT_SOURCE_DIR}/sfp_vec_neg.sv
+    ${CMAKE_CURRENT_SOURCE_DIR}/sfp_vec_lerp.sv
     ${CMAKE_CURRENT_SOURCE_DIR}/sfp_vec3_dot.sv
     ${CMAKE_CURRENT_SOURCE_DIR}/sfp_vec3_cross.sv
 )
