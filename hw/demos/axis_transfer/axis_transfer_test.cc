@@ -44,11 +44,19 @@ TEST_F(AxisTransferTest, print) {
 
   int received = 0;
   dut->m_axis_tready = 1;
+  std::cout << "P3\n" << 20 << ' ' << 20 << "\n255\n";
   while (!dut->m_axis_tlast) {
     tick(dut, m_trace);
 
     if (dut->m_axis_tvalid) {
       received += 1;
+      u_int32_t pixel = dut->m_axis_tdata;
+      u_int8_t r = pixel >> 24;
+      u_int8_t g = pixel >> 16;
+      u_int8_t b = 0;
+
+      std::cout << unsigned(r) << ' ' << unsigned(g) << ' ' << unsigned(b)
+                << '\n';
     }
   }
   dut->m_axis_tready = 0;
