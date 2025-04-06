@@ -18,6 +18,7 @@ enable_testing()
 add_subdirectory(hw/math/fp_core) # Exposes fp_core_sv
 add_subdirectory(hw/math/fp_vec) # Exposes fp_vec_sv
 add_subdirectory(hw/rt) # Exposes rt_sv
+add_subdirectory(hw/coprocessor) # Exposes coprocessor_sv
 
 if (DEMOS)
 add_subdirectory(hw/demos/axis_transfer)

@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2025 Hugo Melder
 
-module raytracer_axis #(
-    // 27 * 4 bytes payload
-    localparam int ScenePayloadSize = 27,
-    localparam int FragmentSize = 3,
-    localparam int DummyData = 32'hCAFEBABE
+// Vivado's IP Integrator forces me to keep this in plain verilog, otherwise it complaints
+// about modports (from sfp_if) having the "wrong" name.
+
+module coprocessor #(
 ) (
     input wire aclk,
     input wire resetn,
@@ -23,20 +22,26 @@ module raytracer_axis #(
     input wire m_axis_tready
 );
 
-  typedef enum logic [2:0] {
-    IDLE,
-    RECV_SCENE,
-    DISPATCH_RENDER,
-    WAIT_FOR_FRAGMENT,
-    SEND_FRAGMENT
-  } state_t;
+  // 27 * 4 bytes payload
+  localparam ScenePayloadSize = 27;
+  localparam FragmentSize = 3;
+  localparam DummyData = 32'hCAFEBABE;
+
+  // State encoding
+  localparam IDLE = 3'b000;
+  localparam RECV_SCENE = 3'b001;
+  localparam DISPATCH_RENDER = 3'b010;
+  localparam WAIT_FOR_FRAGMENT = 3'b011;
+  localparam SEND_FRAGMENT = 3'b100;
+
+  // State declaration
+  reg [2:0] state;
 
   reg [$clog2(ScenePayloadSize) - 1:0] recv_counter;
-  reg [$clog2(FragmentSize) - 1:0] send_counter;
+  reg [31:0] send_counter;
 
 
-  state_t state;
-  always_ff @(posedge aclk or negedge resetn) begin
+  always @(posedge aclk or negedge resetn) begin
     if (!resetn) begin
       state <= IDLE;
     end else begin
