@@ -16,6 +16,7 @@ function(add_verilated_test TEST_NAME SV_SRC CC_SRC TOP_MODULE_NAME)
   target_link_libraries(${TEST_NAME} PRIVATE PkgConfig::gtest_main)
 
   verilate(${TEST_NAME}
+    VERILATOR_ARGS --timing --trace
     SOURCES
       ${SV_SRC}
       ${fp_core_sources}

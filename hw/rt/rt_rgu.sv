@@ -14,10 +14,10 @@
 // Ray Generation Unit (RGU)
 module rt_rgu (
     // Camera Properties
-    input logic [CAMERA_WL-1:0] pixel_00_loc [3],
-    input logic [CAMERA_WL-1:0] pixel_delta_u[3],
-    input logic [CAMERA_WL-1:0] pixel_delta_v[3],
-    input logic [CAMERA_WL-1:0] camera_center[3],
+    input logic [FP_WL-1:0] pixel_00_loc [3],
+    input logic [FP_WL-1:0] pixel_delta_u[3],
+    input logic [FP_WL-1:0] pixel_delta_v[3],
+    input logic [FP_WL-1:0] camera_center[3],
 
     // Image Coordinates
     sfp_if.in x,
@@ -29,8 +29,8 @@ module rt_rgu (
 
   // Create sfp_if instances from camera properties
   sfp_if #(
-      .IW(CAMERA_IW),
-      .QW(CAMERA_QW)
+      .IW(FP_IW),
+      .QW(FP_QW)
   )
       pixel_00_loc_fp[3] (),
       pixel_delta_u_fp[3] (),

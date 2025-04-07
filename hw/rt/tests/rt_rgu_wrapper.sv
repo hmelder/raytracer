@@ -1,22 +1,35 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2025 Hugo Melder
 
-`include "rt_camera_t.svh"
+`include "parameters.vh"
 
 module rt_rgu_wrapper (
-    // Camera Properties
-    input rt_camera_t cam,
+    // Clock and Reset
+    input logic clk,
+    input logic resetn,
+
+    // Control Interface
+    input  logic start,  // Start calculation for one ray
+    output logic valid,  // Calculation finished, output is valid
+
+    input logic [FP_WL-1:0] pixel_00_loc [3],
+    input logic [FP_WL-1:0] pixel_delta_u[3],
+    input logic [FP_WL-1:0] pixel_delta_v[3],
+    input logic [FP_WL-1:0] camera_center[3],
+
     // Image Coordinates
-    input logic [CAMERA_WL-1:0] x,
-    input logic [CAMERA_WL-1:0] y,
+    input logic [FP_WL-1:0] x,
+    input logic [FP_WL-1:0] y,
+
     // Ray (Origin, Direction)
-    output logic [CAMERA_WL-1:0] ray_origin[3],
-    output logic [CAMERA_WL-1:0] ray_direction[3]
+    output logic [FP_WL-1:0] ray_origin[3],
+    output logic [FP_WL-1:0] ray_direction[3]
 );
 
+  // Wrap raw fix point values into the sfp interface
   sfp_if #(
-      .IW(CAMERA_IW),
-      .QW(CAMERA_QW)
+      .IW(FP_IW),
+      .QW(FP_QW)
   )
       ray_origin_fp[3] (), ray_direction_fp[3] (), x_fp (), y_fp ();
 
@@ -31,8 +44,16 @@ module rt_rgu_wrapper (
   assign x_fp.val = x;
   assign y_fp.val = y;
 
-  rt_rgu rgu (
-      .cam(cam),
+  // Instantiate ray generation unit
+  rt_rgu_5_stage rgu (
+      .clk(clk),
+      .resetn(resetn),
+      .start(start),
+      .valid(valid),
+      .pixel_00_loc(pixel_00_loc),
+      .pixel_delta_u(pixel_delta_u),
+      .pixel_delta_v(pixel_delta_v),
+      .camera_center(camera_center),
       .x(x_fp),
       .y(y_fp),
       .ray_origin(ray_origin_fp),
