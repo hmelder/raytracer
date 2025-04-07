@@ -39,18 +39,7 @@ module coprocessor (
   // 27 * 4 bytes payload
   localparam CameraPayloadSize = 27;
 
-  reg config_we;
-  reg [$clog2(CameraPayloadSize) - 1:0] config_w_addr;
-  reg [31:0] config_di;
-  // Every element in the RAM has a read port. 2D array was flattened
-  wire [(32 * CameraPayloadSize - 1):0] config_dout;
-
-  // 
   /*
-   * Drivers
-   *
-   * Write port is driven by this module
-   *
    * Contents
    *
    * | Parameter           | Len (in words) | Offset |
@@ -69,16 +58,64 @@ module coprocessor (
    * | pixel_delta_v       | 3              | 21     |
    * | pixel_00_loc        | 3              | 24     |
    */
-  dp_ram_dist_flat #(
-      .WIDTH(32),
-      .DEPTH(CameraPayloadSize)
-  ) config_ram (
-      .clk(aclk),
-      .we(config_we),
-      .w_addr(config_w_addr),
-      .di(config_di),
-      .flat_dout(config_dout)
-  );
+  parameter WORD_LEN = 32;
+  parameter OFF_ASPECT_RATIO = 0;
+  parameter OFF_IMAGE_WIDTH = 1;
+  parameter OFF_IMAGE_HEIGHT = 2;
+  parameter OFF_FOCAL_LENGTH = 3;
+  parameter OFF_VIEWPORT_HEIGHT = 4;
+  parameter OFF_VIEWPORT_WIDTH = 5;
+  parameter OFF_VIEWPORT_U = 6;
+  parameter OFF_VIEWPORT_V = 9;
+  parameter OFF_VIEWPORT_UPPER_LEFT = 12;
+  parameter OFF_CAMERA_CENTER = 15;
+  parameter OFF_PIXEL_DELTA_U = 18;
+  parameter OFF_PIXEL_DELTA_V = 21;
+  parameter OFF_PIXEL_00_LOC = 24;
+
+  reg [WORD_LEN-1:0] aspect_ratio;
+  reg [WORD_LEN-1:0] image_width;
+  reg [WORD_LEN-1:0] image_height;
+  reg [WORD_LEN-1:0] focal_length;
+
+  reg [WORD_LEN-1:0] viewport_height;
+  reg [WORD_LEN-1:0] viewport_width;
+
+  // Viewport U vector
+  reg [WORD_LEN-1:0] viewport_u_x;
+  reg [WORD_LEN-1:0] viewport_u_y;
+  reg [WORD_LEN-1:0] viewport_u_z;
+
+  // Viewport V vector
+  reg [WORD_LEN-1:0] viewport_v_x;
+  reg [WORD_LEN-1:0] viewport_v_y;
+  reg [WORD_LEN-1:0] viewport_v_z;
+
+  // Viewport upper-left corner
+  reg [WORD_LEN-1:0] viewport_upper_left_x;
+  reg [WORD_LEN-1:0] viewport_upper_left_y;
+  reg [WORD_LEN-1:0] viewport_upper_left_z;
+
+  // Camera center
+  reg [WORD_LEN-1:0] camera_center_x;
+  reg [WORD_LEN-1:0] camera_center_y;
+  reg [WORD_LEN-1:0] camera_center_z;
+
+  // Pixel delta U
+  reg [WORD_LEN-1:0] pixel_delta_u_x;
+  reg [WORD_LEN-1:0] pixel_delta_u_y;
+  reg [WORD_LEN-1:0] pixel_delta_u_z;
+
+  // Pixel delta V
+  reg [WORD_LEN-1:0] pixel_delta_v_x;
+  reg [WORD_LEN-1:0] pixel_delta_v_y;
+  reg [WORD_LEN-1:0] pixel_delta_v_z;
+
+  // Pixel (0,0) location
+  reg [WORD_LEN-1:0] pixel_00_loc_x;
+  reg [WORD_LEN-1:0] pixel_00_loc_y;
+  reg [WORD_LEN-1:0] pixel_00_loc_z;
+
 
   // Render Core
   reg render_start;
@@ -88,7 +125,6 @@ module coprocessor (
   wire [31:0] render_fragment;
   reg [31:0] fragment_reg;
   reg done;
-
 
   always @(posedge aclk or negedge resetn) begin
     if (!resetn) begin
@@ -106,9 +142,6 @@ module coprocessor (
           send_counter <= 0;
           done <= 0;
 
-          // Config RAM Control Registers
-          config_we <= 0;
-
           // Render Core Control Registers
           render_ready <= 0;
           render_start <= 0;
@@ -122,12 +155,45 @@ module coprocessor (
 
         // Receive scene properties such as the camera configuration via AXIS slave
         RECV_SCENE: begin
-          config_we <= 0;
           if (s_axis_tvalid) begin
-            // Write to config RAM
-            config_we <= 1;
-            config_w_addr <= recv_counter;
-            config_di <= s_axis_tdata;
+            case (recv_counter)
+              OFF_ASPECT_RATIO:    aspect_ratio <= s_axis_tdata;
+              OFF_IMAGE_WIDTH:     image_width <= s_axis_tdata;
+              OFF_IMAGE_HEIGHT:    image_height <= s_axis_tdata;
+              OFF_FOCAL_LENGTH:    focal_length <= s_axis_tdata;
+              OFF_VIEWPORT_HEIGHT: viewport_height <= s_axis_tdata;
+              OFF_VIEWPORT_WIDTH:  viewport_width <= s_axis_tdata;
+
+              OFF_VIEWPORT_U:     viewport_u_x <= s_axis_tdata;
+              OFF_VIEWPORT_U + 1: viewport_u_y <= s_axis_tdata;
+              OFF_VIEWPORT_U + 2: viewport_u_z <= s_axis_tdata;
+
+              OFF_VIEWPORT_V:     viewport_v_x <= s_axis_tdata;
+              OFF_VIEWPORT_V + 1: viewport_v_y <= s_axis_tdata;
+              OFF_VIEWPORT_V + 2: viewport_v_z <= s_axis_tdata;
+
+              OFF_VIEWPORT_UPPER_LEFT: viewport_upper_left_x <= s_axis_tdata;
+              OFF_VIEWPORT_UPPER_LEFT + 1: viewport_upper_left_y <= s_axis_tdata;
+              OFF_VIEWPORT_UPPER_LEFT + 2: viewport_upper_left_z <= s_axis_tdata;
+
+              OFF_CAMERA_CENTER:     camera_center_x <= s_axis_tdata;
+              OFF_CAMERA_CENTER + 1: camera_center_y <= s_axis_tdata;
+              OFF_CAMERA_CENTER + 2: camera_center_z <= s_axis_tdata;
+
+              OFF_PIXEL_DELTA_U:     pixel_delta_u_x <= s_axis_tdata;
+              OFF_PIXEL_DELTA_U + 1: pixel_delta_u_y <= s_axis_tdata;
+              OFF_PIXEL_DELTA_U + 2: pixel_delta_u_z <= s_axis_tdata;
+
+              OFF_PIXEL_DELTA_V:     pixel_delta_v_x <= s_axis_tdata;
+              OFF_PIXEL_DELTA_V + 1: pixel_delta_v_y <= s_axis_tdata;
+              OFF_PIXEL_DELTA_V + 2: pixel_delta_v_z <= s_axis_tdata;
+
+              OFF_PIXEL_00_LOC:     pixel_00_loc_x <= s_axis_tdata;
+              OFF_PIXEL_00_LOC + 1: pixel_00_loc_y <= s_axis_tdata;
+              OFF_PIXEL_00_LOC + 2: pixel_00_loc_z <= s_axis_tdata;
+
+              default: ;  // ignore
+            endcase
 
             if (recv_counter == CameraPayloadSize - 1) begin
               s_axis_tready <= 0;
@@ -141,9 +207,6 @@ module coprocessor (
 
         // Configure and dispatch the renderer
         DISPATCH_RENDER: begin
-          // Disable Config RAM Write
-          config_we <= 0;
-
           // Configure Render Core
           render_start <= 1;
           render_ready <= 1;
@@ -199,14 +262,33 @@ module coprocessor (
   end
 
   render_core core (
-      .config_dout(config_dout),
       .clk(aclk),
       .resetn(resetn),
       .start(render_start),
       .valid(render_valid),
       .ready(render_ready),
       .last(render_last),
-      .fragment(render_fragment)
+      .fragment(render_fragment),
+
+      .image_width (image_width),
+      .image_height(image_height),
+
+      .camera_center_x(camera_center_x),
+      .camera_center_y(camera_center_y),
+      .camera_center_z(camera_center_z),
+
+      .pixel_delta_u_x(pixel_delta_u_x),
+      .pixel_delta_u_y(pixel_delta_u_y),
+      .pixel_delta_u_z(pixel_delta_u_z),
+
+      .pixel_delta_v_x(pixel_delta_v_x),
+      .pixel_delta_v_y(pixel_delta_v_y),
+      .pixel_delta_v_z(pixel_delta_v_z),
+
+      .pixel_00_loc_x(pixel_00_loc_x),
+      .pixel_00_loc_y(pixel_00_loc_y),
+      .pixel_00_loc_z(pixel_00_loc_z)
   );
+
 
 endmodule
