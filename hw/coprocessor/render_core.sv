@@ -6,8 +6,8 @@
 // rt_camera_t fields are exposed as parameters, because coprocessor.v needs to
 // be a plain verilog file
 module render_core (
-    // rt_camera_t fields
-    input logic [CAMERA_WL-1:0] cam_buf[27],
+    // Config RAM read port
+    input logic [31:0] config_dout[CAMERA_PAYLOAD_SIZE - 1:0],
 
     // Control
     input logic clk,
@@ -27,56 +27,28 @@ module render_core (
     OUTPUT  // Can be eliminated
   } state_t;
 
-  rt_camera_t camera;
-
-  // Arggh, not sure if there is a better way to unmarshal the buffer into the struct
-  always_comb begin
-    camera.aspect_ratio           = cam_buf[0];
-    camera.image_width            = cam_buf[1];
-    camera.image_height           = cam_buf[2];
-
-    camera.focal_length           = cam_buf[3];
-    camera.viewport_height        = cam_buf[4];
-    camera.viewport_width         = cam_buf[5];
-
-    camera.camera_center[0]       = cam_buf[6];
-    camera.camera_center[1]       = cam_buf[7];
-    camera.camera_center[2]       = cam_buf[8];
-
-    camera.viewport_u[0]          = cam_buf[9];
-    camera.viewport_u[1]          = cam_buf[10];
-    camera.viewport_u[2]          = cam_buf[11];
-
-    camera.viewport_v[0]          = cam_buf[12];
-    camera.viewport_v[1]          = cam_buf[13];
-    camera.viewport_v[2]          = cam_buf[14];
-
-    camera.viewport_upper_left[0] = cam_buf[15];
-    camera.viewport_upper_left[1] = cam_buf[16];
-    camera.viewport_upper_left[2] = cam_buf[17];
-
-    camera.pixel_delta_u[0]       = cam_buf[18];
-    camera.pixel_delta_u[1]       = cam_buf[19];
-    camera.pixel_delta_u[2]       = cam_buf[20];
-
-    camera.pixel_delta_v[0]       = cam_buf[21];
-    camera.pixel_delta_v[1]       = cam_buf[22];
-    camera.pixel_delta_v[2]       = cam_buf[23];
-
-    camera.pixel_00_loc[0]        = cam_buf[24];
-    camera.pixel_00_loc[1]        = cam_buf[25];
-    camera.pixel_00_loc[2]        = cam_buf[26];
-  end
-
-
   sfp_if #(
       .IW(CAMERA_IW),
       .QW(CAMERA_QW)
   )
       x_fp (), y_fp (), ray_origin[3] (), ray_direction[3] ();
 
+  logic [31:0] camera_center[3], pixel_delta_u[3], pixel_delta_v[3], pixel_00_loc[3];
+  genvar j;
+  generate
+    for (j = 0; j < 3; j = j + 1) begin : rgu_var_assign
+      assign camera_center[j] = config_dout[OFF_CAMERA_CENTER+j];
+      assign pixel_delta_u[j] = config_dout[OFF_PIXEL_DELTA_U+j];
+      assign pixel_delta_v[j] = config_dout[OFF_PIXEL_DELTA_V+j];
+      assign pixel_00_loc[j]  = config_dout[OFF_PIXEL_00_LOC+j];
+    end
+  endgenerate
+
   rt_rgu rgu (
-      .cam(camera),
+      .camera_center(camera_center),
+      .pixel_delta_u(pixel_delta_u),
+      .pixel_delta_v(pixel_delta_v),
+      .pixel_00_loc(pixel_00_loc),
       .x(x_fp),
       .y(y_fp),
       .ray_origin(ray_origin),
@@ -87,9 +59,8 @@ module render_core (
   logic [CAMERA_IW-1 : 0] image_height_int;
   reg [CAMERA_IW-1 : 0] x, y;
 
-  assign image_width_int  = CAMERA_IW'((camera.image_width >> CAMERA_QW));
-  assign image_height_int = CAMERA_IW'((camera.image_height >> CAMERA_QW));
-
+  assign image_width_int  = CAMERA_IW'((config_dout[OFF_IMAGE_WIDTH] >> CAMERA_QW));
+  assign image_height_int = CAMERA_IW'((config_dout[OFF_IMAGE_HEIGHT] >> CAMERA_QW));
 
   // Register result of RGU
   reg [CAMERA_WL-1 : 0] ray_origin_reg[3], ray_direction_reg[3];

@@ -4,8 +4,7 @@
 // Vivado's IP Integrator forces me to keep this in plain verilog, otherwise it complaints
 // about modports (from sfp_if) having the "wrong" name.
 
-module coprocessor #(
-) (
+module coprocessor (
     input wire aclk,
     input wire resetn,
 
@@ -22,10 +21,6 @@ module coprocessor #(
     input wire m_axis_tready
 );
 
-  // 27 * 4 bytes payload
-  localparam CameraPayloadSize = 27;
-
-
   // State encoding
   localparam IDLE = 3'b000;
   localparam RECV_SCENE = 3'b001;
@@ -36,10 +31,53 @@ module coprocessor #(
   // State declaration
   reg [2:0] state;
 
+  // Counters
   reg [$clog2(CameraPayloadSize) - 1:0] recv_counter;
-  reg [31:0] recv_buffer[CameraPayloadSize];
-
   reg [31:0] send_counter;
+
+  // Camera Config RAM
+  // 27 * 4 bytes payload
+  localparam CameraPayloadSize = 27;
+
+  reg config_we;
+  reg [$clog2(CameraPayloadSize) - 1:0] config_w_addr;
+  reg [31:0] config_di;
+  wire [31:0] config_dout[CameraPayloadSize-1:0];
+
+  // 
+  /*
+   * Drivers
+   *
+   * Write port is driven by this module
+   *
+   * Contents
+   *
+   * | Parameter           | Len (in words) | Offset |
+   * |---------------------|----------------|--------|
+   * | aspect_ratio        | 1              | 0      |
+   * | image_width         | 1              | 1      |
+   * | image_height        | 1              | 2      |
+   * | focal_length        | 1              | 3      |
+   * | viewport_height     | 1              | 4      |
+   * | viewport_width      | 1              | 5      |
+   * | viewport_u          | 3              | 6      |
+   * | viewport_v          | 3              | 9      |
+   * | viewport_upper_left | 3              | 12     |
+   * | camera_center       | 3              | 15     |
+   * | pixel_delta_u       | 3              | 18     |
+   * | pixel_delta_v       | 3              | 21     |
+   * | pixel_00_loc        | 3              | 24     |
+   */
+  dp_ram_dist #(
+      .WIDTH(32),
+      .DEPTH(CameraPayloadSize)
+  ) config_ram (
+      .clk(aclk),
+      .we(config_we),
+      .w_addr(config_w_addr),
+      .di(config_di),
+      .parallel_dout(config_dout)
+  );
 
   // Render Core
   reg render_start;
@@ -67,6 +105,9 @@ module coprocessor #(
           send_counter <= 0;
           done <= 0;
 
+          // Config RAM Control Registers
+          config_we <= 0;
+
           // Render Core Control Registers
           render_ready <= 0;
           render_start <= 0;
@@ -80,8 +121,12 @@ module coprocessor #(
 
         // Receive scene properties such as the camera configuration via AXIS slave
         RECV_SCENE: begin
+          config_we <= 0;
           if (s_axis_tvalid) begin
-            recv_buffer[recv_counter] <= s_axis_tdata;
+            // Write to config RAM
+            config_we <= 1;
+            config_w_addr <= recv_counter;
+            config_di <= s_axis_tdata;
 
             if (recv_counter == CameraPayloadSize - 1) begin
               s_axis_tready <= 0;
@@ -95,8 +140,13 @@ module coprocessor #(
 
         // Configure and dispatch the renderer
         DISPATCH_RENDER: begin
+          // Disable Config RAM Write
+          config_we <= 0;
+
+          // Configure Render Core
           render_start <= 1;
           render_ready <= 1;
+
           state <= WAIT_FOR_FRAGMENT;
         end
 
@@ -148,7 +198,7 @@ module coprocessor #(
   end
 
   render_core core (
-      .cam_buf(recv_buffer),
+      .config_dout(config_dout),
       .clk(aclk),
       .resetn(resetn),
       .start(render_start),
@@ -157,6 +207,5 @@ module coprocessor #(
       .last(render_last),
       .fragment(render_fragment)
   );
-
 
 endmodule
