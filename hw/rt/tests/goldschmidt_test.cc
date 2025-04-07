@@ -57,15 +57,15 @@ TEST_F(GoldschmidtTest, SinglePipelineIteration) {
 
   float val = 591.6922f;
   float rsqrt_val = 1 / sqrtf(591.6922);
-  float est = rsqrt_val * 1.5f;
+  float est = rsqrt_val * 0.5f;
 
   std::cout << "val: " << val << " rsqrt: " << rsqrt_val
-            << " sqrt:" << sqrtf(val) << std::endl;
+            << " sqrt:" << sqrtf(val) << " est: " << est << std::endl;
 
   dut->in = FLOAT_2_FIX(val);
   dut->est = FLOAT_2_FIX(est);
   dut->start = 1;
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 10; i++) {
     tick(dut, trace); // Stage 0
     float rsqrt = FIX_2_FLOAT(dut->rsqrt);
     float sqrt = FIX_2_FLOAT(dut->sqrt);

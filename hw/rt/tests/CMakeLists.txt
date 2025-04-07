@@ -41,3 +41,9 @@ add_verilated_test(Vrt_rgu
   ${CMAKE_CURRENT_SOURCE_DIR}/rt_rgu_test.cc
   rt_rgu_wrapper
 )
+
+add_verilated_test(Vgoldschmidt
+  ${CMAKE_CURRENT_SOURCE_DIR}/goldschmidt_wrapper.sv
+  ${CMAKE_CURRENT_SOURCE_DIR}/goldschmidt_test.cc
+  goldschmidt_wrapper
+)
