@@ -42,7 +42,8 @@ module coprocessor (
   reg config_we;
   reg [$clog2(CameraPayloadSize) - 1:0] config_w_addr;
   reg [31:0] config_di;
-  wire [31:0] config_dout[CameraPayloadSize-1:0];
+  // Every element in the RAM has a read port. 2D array was flattened
+  wire [(32 * CameraPayloadSize - 1):0] config_dout;
 
   // 
   /*
@@ -68,7 +69,7 @@ module coprocessor (
    * | pixel_delta_v       | 3              | 21     |
    * | pixel_00_loc        | 3              | 24     |
    */
-  dp_ram_dist #(
+  dp_ram_dist_flat #(
       .WIDTH(32),
       .DEPTH(CameraPayloadSize)
   ) config_ram (
@@ -76,7 +77,7 @@ module coprocessor (
       .we(config_we),
       .w_addr(config_w_addr),
       .di(config_di),
-      .parallel_dout(config_dout)
+      .flat_dout(config_dout)
   );
 
   // Render Core
