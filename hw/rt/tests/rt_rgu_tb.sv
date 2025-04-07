@@ -16,15 +16,12 @@ module rt_rgu_tb;
 
   // Clock Generation
   initial begin
-    aclk = 1'b0;
+    clk = 1'b0;
     forever begin
       #(CLOCK_HALF_PERIOD);
-      aclk = ~aclk;
+      clk = ~clk;
     end
   end
-
-  int x = 0;
-  int y = 1;
 
   /*
    Payload for width = 10, aspect ratio = 16/9, focal length = 1.0
@@ -59,10 +56,10 @@ module rt_rgu_tb;
 
   logic start;
   logic valid;
-  logic [31-1:0] pixel_00_loc[3] = '{32'hfff8cccd, 32'h00033333, 32'hfffc0000};
-  logic [31-1:0] pixel_delta_u[3] = '{32'h00019999, 32'0, 32'0};
-  logic [31-1:0] pixel_delta_v[3] = '{32'0, 32'hfffe6667, 32'0};
-  logic [31-1:0] camera_center[3] = '{32'0, 32'0, 32'0};
+  logic [31:0] pixel_00_loc[3] = '{32'hfff8cccd, 32'h00033333, 32'hfffc0000};
+  logic [31:0] pixel_delta_u[3] = '{32'h00019999, 0, 0};
+  logic [31:0] pixel_delta_v[3] = '{0, 32'hfffe6667, 0};
+  logic [31:0] camera_center[3] = '{0, 0, 0};
   logic [31:0] ray_origin[3];
   logic [31:0] ray_direction[3];
 
@@ -81,30 +78,32 @@ module rt_rgu_tb;
 
     #(CLOCK_HALF_PERIOD);  // to make inputs and capture from testbench not aligned with clock edges
     // Reset Coprocessor
-    aresetn = 1'b0;  // Assert reset (active low)
+    resetn = 1'b0;  // Assert reset (active low)
     #(CLOCK_PERIOD);
-    aresetn = 1'b1;  // Deassert reset
+    resetn = 1'b1;  // Deassert reset
     #(CLOCK_PERIOD);
 
     y = 1 << 18;
     start = 1;
     //  Saturate pipeline
-    for (int i = 0; i < 4; i++) {
-        x = i << 18;
-        assert(valid == 0);
-        #(CLOCK_PERIOD);
-    }
+    for (int i = 0; i < 4; i++) begin
+      x = i << 18;
+      assert (valid == 0);
+      #(CLOCK_PERIOD);
+    end
     start = 0;
 
-      // Validation
-      for (int i = 0; i < 4; i++) {
-        #(CLOCK_PERIOD);
-        assert(valid == 1);
-        // Check ray_direction
-        for (int j = 0; j < 3; j++) {
-            assert(ray_direction[j] == expected[i][j]);
-        }
-      }
+    // Validation
+    for (int i = 0; i < 4; i++) begin
+      #(CLOCK_PERIOD);
+      assert (valid == 1);
+      // Check ray_direction
+      for (int j = 0; j < 3; j++) begin
+        assert (ray_direction[j] == expected[i][j]);
+      end
+    end
+
+    $finish;
   end
 
   rt_rgu_wrapper dut (
