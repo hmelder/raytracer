@@ -14,7 +14,11 @@
 // Ray Generation Unit (RGU)
 module rt_rgu (
     // Camera Properties
-    input rt_camera_t cam,
+    input logic [CAMERA_WL-1:0] pixel_00_loc [3],
+    input logic [CAMERA_WL-1:0] pixel_delta_u[3],
+    input logic [CAMERA_WL-1:0] pixel_delta_v[3],
+    input logic [CAMERA_WL-1:0] camera_center[3],
+
     // Image Coordinates
     sfp_if.in x,
     sfp_if.in y,
@@ -37,10 +41,10 @@ module rt_rgu (
       tmp_y_delta_v_fp[3] (),
       tmp_pixel_off_fp[3] ();
 
-  `ASSIGN_FP(pixel_00_loc_fp, cam.pixel_00_loc)
-  `ASSIGN_FP(pixel_delta_u_fp, cam.pixel_delta_u)
-  `ASSIGN_FP(pixel_delta_v_fp, cam.pixel_delta_v)
-  `ASSIGN_FP(camera_center_fp, cam.camera_center)
+  `ASSIGN_FP(pixel_00_loc_fp, pixel_00_loc)
+  `ASSIGN_FP(pixel_delta_u_fp, pixel_delta_u)
+  `ASSIGN_FP(pixel_delta_v_fp, pixel_delta_v)
+  `ASSIGN_FP(camera_center_fp, camera_center)
 
   assign ray_origin = camera_center_fp;
 
