@@ -13,32 +13,40 @@ module goldschmidt (
     sfp_if.out sqrt
 );
 
-  sfp_if #(in.IW, in.QW) const_3 ();
+  sfp_if #(IW, QW) const_3 ();
 
-  assign const_3.val = 3 << in.IW;
+  parameter IW = in.IW * 2;
+  parameter QW = in.QW * 2;
+
+  assign const_3.val = 3 << IW;
 
   // --- Pipeline Registers ---
   // Stage 0: Input Registers
-  sfp_if #(in.IW, in.QW) b_0_reg (), x_0_reg (), y_0_reg (), YY_0_reg ();
+  sfp_if #(in.IW, in.QW) b_0_reg (), y_0_reg ();
+  sfp_if #(IW, QW) x_0_reg (), YY_0_reg ();
 
   // Stage 1 
-  sfp_if #(in.IW, in.QW) x_0_reg_stage1 (), y_0_reg_stage1 (), b_1_reg ();
+  sfp_if #(IW, QW) x_0_reg_stage1 (), b_1_reg ();
+  sfp_if #(in.IW, in.QW) y_0_reg_stage1 ();
 
   // Stage 2
-  sfp_if #(in.IW, in.QW) x_0_reg_stage2 (), y_0_reg_stage2 (), b_1_reg_stage2 (), Y_1_reg ();
+  sfp_if #(IW, QW) x_0_reg_stage2 (), b_1_reg_stage2 (), Y_1_reg ();
+  sfp_if #(in.IW, in.QW) y_0_reg_stage2 ();
 
   // Stage 3
-  sfp_if #(in.IW, in.QW) x_1_reg (), y_1_reg (), YY_1_reg (), b_1_reg_stage3 ();
+  sfp_if #(IW, QW) YY_1_reg (), b_1_reg_stage3 ();
+  sfp_if #(rsqrt.IW, rsqrt.QW) y_1_reg ();
+  sfp_if #(sqrt.IW, sqrt.QW) x_1_reg ();
 
   /*
   // Stage 4
-  sfp_if #(in.IW, in.QW) b_2_reg (), x_1_reg_stage4 (), y_1_reg_stage4 ();
+  sfp_if #(IW, QW) b_2_reg (), x_1_reg_stage4 (), y_1_reg_stage4 ();
 
   // Stage 5
-  sfp_if #(in.IW, in.QW) x_1_reg_stage5 (), y_1_reg_stage5 (), Y_2_reg ();
+  sfp_if #(IW, QW) x_1_reg_stage5 (), y_1_reg_stage5 (), Y_2_reg ();
 
   // Stage 6: Final multiplication (output register)
-  sfp_if #(in.IW, in.QW) x_2_reg (), y_2_reg ();
+  sfp_if #(IW, QW) x_2_reg (), y_2_reg ();
   */
 
 
@@ -48,7 +56,7 @@ module goldschmidt (
 
 
   // --- Combinational Logic for Pipeline Stages ---
-  sfp_if #(in.IW, in.QW) tmp_x_0_stage0 (), tmp_YY_0_stage0 ();
+  sfp_if #(IW, QW) tmp_x_0_stage0 (), tmp_YY_0_stage0 ();
 
   // Stage 0 Logic (Inputs: in, est)
   // x_0 = S * y_0 <=> in * est
@@ -68,7 +76,7 @@ module goldschmidt (
   );
 
   // Stage 1 (Inputs: b_0_reg, YY_0_reg)
-  sfp_if #(in.IW, in.QW) tmp_b_1_stage1 ();
+  sfp_if #(IW, QW) tmp_b_1_stage1 ();
 
   // b_1 = b_0 * YY_0
   sfp_mul mul_b_1_stage1 (
@@ -79,7 +87,7 @@ module goldschmidt (
   );
 
   // Stage 2 (Inputs: b_1_reg)
-  sfp_if #(in.IW, in.QW) tmp_Y_1_stage2 ();
+  sfp_if #(IW, QW) tmp_Y_1_stage2 ();
 
   // Y_1 = 1/2 * (3-b_1) <=> Y_1 = (3-b_1) >>> 1 (Shift done below in register assignment)
   sfp_sub sub_Y_1_stage2 (
@@ -90,8 +98,9 @@ module goldschmidt (
   );
 
   // Stage 3 (Inputs: x_0_reg_stage2, y_0_reg_stage2, Y_1_reg, b_1_reg_stage2)
-  sfp_if #(in.IW, in.QW) tmp_x_1_stage3 (), tmp_y_1_stage3 ();
-  //  sfp_if #(in.IW, in.QW) tmp_YY_1_stage3 ();
+  sfp_if #(rsqrt.IW, rsqrt.QW) tmp_y_1_stage3 ();
+  sfp_if #(sqrt.IW, sqrt.QW) tmp_x_1_stage3 ();
+  //  sfp_if #(IW, QW) tmp_YY_1_stage3 ();
 
   // x_1 = x_0 * Y_1
   sfp_mul mul_x_1_stage3 (
@@ -119,7 +128,7 @@ module goldschmidt (
   );
 
   // Stage 4 (Inputs: b_1_reg_stage3, YY_1_reg)
-  sfp_if #(in.IW, in.QW) tmp_b_2_stage4 ();
+  sfp_if #(IW, QW) tmp_b_2_stage4 ();
 
   sfp_mul mul_b_2_stage4 (
       .x(b_1_reg_stage3),
@@ -129,7 +138,7 @@ module goldschmidt (
   );
 
   // Stage 5 (Inputs: b_2_reg)
-  sfp_if #(in.IW, in.QW) tmp_Y_2_stage5 ();
+  sfp_if #(IW, QW) tmp_Y_2_stage5 ();
 
   sfp_sub sub_Y_2_stage5 (
       .in1(const_3),
@@ -139,7 +148,7 @@ module goldschmidt (
   );
 
   // Stage 6 (Inputs: x_1_reg_stage5, y_1_reg_stage5, Y_2_reg)
-  sfp_if #(in.IW, in.QW) tmp_x_2_stage6 (), tmp_y_2_stage6 ();
+  sfp_if #(IW, QW) tmp_x_2_stage6 (), tmp_y_2_stage6 ();
 
   // x_2 = x_1 * Y_2
   sfp_mul mul_x_2_stage5 (
