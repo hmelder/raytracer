@@ -11,17 +11,18 @@ module rt_rgu_5_stage (
 
     // Control Interface
     input  logic start,  // Start calculation for one ray
+    input  logic stall,
     output logic valid,  // Calculation finished, output is valid
 
     // Camera Properties (Inputs - assumed stable or registered externally if needed)
-    input logic [FP_WL-1:0] pixel_00_loc [3],
-    input logic [FP_WL-1:0] pixel_delta_u[3],
-    input logic [FP_WL-1:0] pixel_delta_v[3],
-    input logic [FP_WL-1:0] camera_center[3],
+    input logic signed [FP_WL-1:0] pixel_00_loc [3],
+    input logic signed [FP_WL-1:0] pixel_delta_u[3],
+    input logic signed [FP_WL-1:0] pixel_delta_v[3],
+    input logic signed [FP_WL-1:0] camera_center[3],
 
     // Image Coordinates (Input - registered on start)
-    sfp_if.in x,
-    sfp_if.in y,
+    input logic [COORDINATE_BITS-1:0] x,
+    input logic [COORDINATE_BITS-1:0] y,
 
     // Ray Output (Registered, valid when valid is high)
     sfp_if.out ray_origin[3],  // Registered Output
@@ -139,14 +140,16 @@ module rt_rgu_5_stage (
       `ASSIGN_FP_VEC_S_SEQ(pixel_center_reg, '0)
       `ASSIGN_FP_VEC_S_SEQ(ray_direction_reg, '0)
 
+    end else if (stall) begin
+      // We stall the pipeline. Do nothing.
     end else begin
       // Pipeline Staging and Input Latching
       pipe_valid <= {pipe_valid[PIPE_DEPTH-2:0], start};  // Shift valid bit
 
       if (start) begin
         // Latch inputs on start
-        x_reg.val <= x.val;
-        y_reg.val <= y.val;
+        x_reg.val <= {1'b0, x, {FP_QW{1'b0}}};
+        y_reg.val <= {1'b0, y, {FP_QW{1'b0}}};
         // Latch ray origin (camera center) when starting
         `ASSIGN_FP_VEC_SEQ(ray_origin_reg, camera_center_fp);
       end

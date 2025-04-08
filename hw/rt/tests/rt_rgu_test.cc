@@ -53,18 +53,6 @@ TEST_F(RtRGUTest, SinglePipelineIteration) {
   // Get Scene
   Scene scene(10.0f, 16.0f / 9.0f, 1.0f);
   struct Scene::camera cam = scene.raw_camera();
-  for (int i = 0; i < 3; i++) {
-    printf("%08x\n", cam.pixel_00_loc[i]);
-  }
-  for (int i = 0; i < 3; i++) {
-    printf("%08x\n", cam.pixel_delta_u[i]);
-  }
-  for (int i = 0; i < 3; i++) {
-    printf("%08x\n", cam.pixel_delta_v[i]);
-  }
-  for (int i = 0; i < 3; i++) {
-    printf("%08x\n", cam.camera_center[i]);
-  }
 
   ASSIGN_RAW_VEC(dut->pixel_00_loc, cam.pixel_00_loc)
   ASSIGN_RAW_VEC(dut->pixel_delta_u, cam.pixel_delta_u)
@@ -74,11 +62,11 @@ TEST_F(RtRGUTest, SinglePipelineIteration) {
   int x = 0;
   int y = 1;
 
-  dut->y = y << FP_QW;
+  dut->y = y;
   dut->start = 1;
   //  Saturate pipeline
   for (int i = 0; i < 4; i++) {
-    dut->x = i << FP_QW;
+    dut->x = i;
     EXPECT_EQ(dut->valid, 0);
     tick(dut, trace);
   }

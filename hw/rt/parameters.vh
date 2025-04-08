@@ -4,13 +4,13 @@
 `ifndef PARAMETERS
 `define PARAMETERS
 
-parameter int FP_IW = 14;
-parameter int FP_QW = 18;
-parameter int FP_WL = 32;
+parameter FP_IW = 16;
+parameter FP_QW = 16;
+parameter FP_WL = 32;
 
-// Max Integer in Q14.18: 2^14/2 - 1 = 8191
-// Image coordinates are unsigned ints, thus 2^13 = 8192
-parameter int COORDINATE_BITS = 13;
+parameter COORDINATE_BITS = 15;
+
+parameter PIXEL_WIDTH = 24;  // RGB
 
 `define ASSIGN_FP_VEC_SEQ(A, B) \
     A[0].val <= B[0].val; \

@@ -2,9 +2,9 @@
 
 #include "vec3.h"
 
-#define FP_IW 14
-#define FP_QW 18
-#define FP_2_POW_QW 262144
+#define FP_IW 16
+#define FP_QW 16
+#define FP_2_POW_QW 65536
 #define FP_WL 32
 
 #define SCENE_PAYLOAD_SIZE 27
@@ -67,6 +67,9 @@ public:
         focal_length(focal_length) {
 
     image_height = int(image_width / aspect_ratio);
+    if (image_height < 1) {
+      image_height = 1;
+    }
     viewport_height = 2.0f;
     viewport_width = viewport_height * (image_width / image_height);
 

@@ -105,7 +105,7 @@ TEST_F(GoldschmidtTest, SinglePipelineIteration) {
     dut->in = val_fix;
     dut->est = est_fix;
     dut->start = 1;
-    for (int i = 0; i < 4 * iterations; i++) {
+    for (int i = 0; i < 5 * iterations; i++) {
       tick(dut, trace); // Stage 0
 
       if (((i + 1) % 4 == 0) && (((i + 1) / 4) != (iterations - 1))) {
@@ -121,8 +121,8 @@ TEST_F(GoldschmidtTest, SinglePipelineIteration) {
     avg_sqrt_err += abs(sqrt - sqrtf(val));
     avg_rsqrt_err += abs(rsqrt - rsqrt_val);
 
-    EXPECT_NEAR(rsqrt, rsqrt_val, 0.0001) << "with value " << val;
-    EXPECT_NEAR(sqrt, sqrt_val, 0.01) << "with value " << val;
+    EXPECT_NEAR(rsqrt, rsqrt_val, 0.0001) << "with value " << val_fix;
+    EXPECT_NEAR(sqrt, sqrt_val, 0.01) << "with value " << val_fix;
   }
 
   avg_rsqrt_err /= vec.size();

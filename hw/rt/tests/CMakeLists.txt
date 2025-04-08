@@ -47,3 +47,53 @@ add_verilated_test(Vgoldschmidt
   ${CMAKE_CURRENT_SOURCE_DIR}/goldschmidt_test.cc
   goldschmidt_wrapper
 )
+
+# rt_controller
+add_executable(Vrt_controller ${CMAKE_CURRENT_SOURCE_DIR}/rt_controller_test.cc)
+target_link_libraries(Vrt_controller PRIVATE PkgConfig::gtest_main)
+
+verilate(Vrt_controller
+  VERILATOR_ARGS --timing --trace
+  SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/../rt_controller.sv
+    ${fp_core_sources}
+    ${fp_vec_sources}
+  INCLUDE_DIRS
+    ${fp_core_includes}
+    ${fp_vec_includes}
+    ${rt_includes}
+  TOP_MODULE
+    rt_controller
+)
+
+add_test(
+  NAME Vrt_controller
+  COMMAND $<TARGET_FILE:Vrt_controller>
+)
+
+
+# rt_core
+# FIXME: this is really ugly
+add_executable(Vrt_core ${CMAKE_CURRENT_SOURCE_DIR}/rt_core_test.cc)
+target_link_libraries(Vrt_core PRIVATE PkgConfig::gtest_main)
+
+verilate(Vrt_core
+  VERILATOR_ARGS --timing --trace
+  SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/../rt_core.sv
+    ${CMAKE_CURRENT_SOURCE_DIR}/../rt_controller.sv
+    ${CMAKE_CURRENT_SOURCE_DIR}/../rt_rgu_5_stage.sv
+    ${fp_core_sources}
+    ${fp_vec_sources}
+  INCLUDE_DIRS
+    ${fp_core_includes}
+    ${fp_vec_includes}
+    ${rt_includes}
+  TOP_MODULE
+    rt_core
+)
+
+add_test(
+  NAME Vrt_core
+  COMMAND $<TARGET_FILE:Vrt_core>
+)
