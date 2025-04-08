@@ -137,6 +137,7 @@ TEST_F(RtCoreTest, Stall) {
   // rt_controller state : READY
   for (int i = 0; i < 5; i++) {
     tick(dut, trace);
+    dut->start = 0;
     EXPECT_EQ(dut->valid, 0);
     EXPECT_EQ(dut->last, 0);
   }

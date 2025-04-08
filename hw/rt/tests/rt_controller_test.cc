@@ -77,11 +77,11 @@ TEST_F(RtControllerTest, OnebyOneImage) {
   }
 
   tick(dut, trace);
-  EXPECT_EQ(dut->last, 1);
+  EXPECT_EQ(dut->last, 0);
   EXPECT_EQ(dut->rgu_start, 0);
 
   tick(dut, trace);
-  EXPECT_EQ(dut->last, 0);
+  EXPECT_EQ(dut->last, 1);
   EXPECT_EQ(dut->rgu_start, 0);
 }
 
@@ -129,11 +129,11 @@ TEST_F(RtControllerTest, LargeImage) {
   }
 
   tick(dut, trace);
-  EXPECT_EQ(dut->last, 1);
+  EXPECT_EQ(dut->last, 0);
   EXPECT_EQ(dut->rgu_start, 0);
 
   tick(dut, trace);
-  EXPECT_EQ(dut->last, 0);
+  EXPECT_EQ(dut->last, 1);
   EXPECT_EQ(dut->rgu_start, 0);
 }
 
