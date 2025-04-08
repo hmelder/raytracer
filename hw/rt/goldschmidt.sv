@@ -167,7 +167,7 @@ module goldschmidt (
   */
 
   // --- Sequential Logic (Registers and Control) ---
-  always_ff @(posedge clk or negedge resetn) begin
+  always_ff @(posedge clk) begin
     if (!resetn) begin
       // Reset pipeline registers and control
       pipe_valid <= '0;
