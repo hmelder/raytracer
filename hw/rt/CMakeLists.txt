@@ -3,7 +3,7 @@ add_library(rt_sv INTERFACE)
 target_sources(rt_sv INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/rt_rgu_5_stage.sv
     ${CMAKE_CURRENT_SOURCE_DIR}/rt_controller.sv
-    ${CMAKE_CURRENT_SOURCE_DIR}/goldschmidt.sv
+    ${CMAKE_CURRENT_SOURCE_DIR}/rt_core.sv
 )
 
 target_include_directories(rt_sv INTERFACE

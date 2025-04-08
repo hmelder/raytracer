@@ -42,11 +42,11 @@ add_verilated_test(Vrt_rgu
   rt_rgu_wrapper
 )
 
-add_verilated_test(Vgoldschmidt
-  ${CMAKE_CURRENT_SOURCE_DIR}/goldschmidt_wrapper.sv
-  ${CMAKE_CURRENT_SOURCE_DIR}/goldschmidt_test.cc
-  goldschmidt_wrapper
-)
+# add_verilated_test(Vgoldschmidt
+#   ${CMAKE_CURRENT_SOURCE_DIR}/goldschmidt_wrapper.sv
+#   ${CMAKE_CURRENT_SOURCE_DIR}/goldschmidt_test.cc
+#   goldschmidt_wrapper
+# )
 
 # rt_controller
 add_executable(Vrt_controller ${CMAKE_CURRENT_SOURCE_DIR}/rt_controller_test.cc)
