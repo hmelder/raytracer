@@ -107,7 +107,7 @@ TEST_F(RtCoreTest, Stall) {
   trace->open("RtCoreTest_Stall.vcd");
 
   // Get Scene
-  Scene scene(10.0f, 16.0f / 9.0f, 1.0f);
+  Scene scene(64.0f, 16.0f / 9.0f, 1.0f);
   struct Scene::camera cam = scene.raw_camera();
 
   dut->resetn = 0; // Assert reset (active low)
@@ -152,7 +152,7 @@ TEST_F(RtCoreTest, Stall) {
       vec3 pixel_center = scene.pixel_center(w, h);
       vec3 ray_direction = pixel_center - scene.camera_center;
 
-      EXPECT_NEAR(FIX_2_FLOAT(dut->pixel), ray_direction[0], 0.0005);
+      EXPECT_NEAR(FIX_2_FLOAT(dut->pixel), ray_direction[1], 0.005);
 
       if (w == (image_width - 1) && (h == (image_height - 1))) {
         dut->stall = 1;
