@@ -59,7 +59,7 @@ module tb_axis;
   int recv_counter = 0;
 
   parameter SCENE_PAYLOAD_SIZE = 27;
-  parameter EXPECTED_DATA_SIZE = 20 * 11;
+  parameter EXPECTED_DATA_SIZE = 32 * 32;
   reg [31:0] config_mem[SCENE_PAYLOAD_SIZE];
   reg [31:0] expected_pixels[EXPECTED_DATA_SIZE];
 
@@ -87,7 +87,7 @@ module tb_axis;
     s_axis_tvalid = 1'b1;  // Signal coprocessor that we are willing to send data
     while (send_counter < SCENE_PAYLOAD_SIZE) begin
       if (s_axis_tready) begin
-        s_axis_tdata <= config_mem[send_counter];
+        s_axis_tdata = config_mem[send_counter];
 
         if (send_counter == SCENE_PAYLOAD_SIZE - 1) begin
           s_axis_tlast = 1'b1;
@@ -108,7 +108,15 @@ module tb_axis;
     while (m_axis_tlast | ~m_axis_tlast_prev) begin
       if (m_axis_tvalid) begin
         // TODO: change once we send actual pixels
-        assert ($abs(m_axis_tdata - expected_pixels[recv_counter]) <= 32'h10000);
+        $display("%h", m_axis_tdata);
+        assert (m_axis_tdata == expected_pixels[recv_counter])
+        else
+          $error(
+              "Error: Received data (0x%h) does not match expected data (0x%h) at index %0d",
+              m_axis_tdata,
+              expected_pixels[recv_counter],
+              recv_counter
+          );
         recv_counter = recv_counter + 1;
       end
 
