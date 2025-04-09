@@ -4,6 +4,7 @@ target_sources(rt_sv INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/rt_rgu_5_stage.sv
     ${CMAKE_CURRENT_SOURCE_DIR}/rt_controller.sv
     ${CMAKE_CURRENT_SOURCE_DIR}/rt_core.sv
+    #${CMAKE_CURRENT_SOURCE_DIR}/goldschmidt.sv
     ${CMAKE_CURRENT_SOURCE_DIR}/coprocessor.v
 )
 

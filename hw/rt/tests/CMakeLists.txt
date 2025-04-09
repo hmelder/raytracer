@@ -97,3 +97,30 @@ add_test(
   NAME Vrt_core
   COMMAND $<TARGET_FILE:Vrt_core>
 )
+
+# coprocessor
+# FIXME: this is really ugly
+add_executable(Vcoprocessor ${CMAKE_CURRENT_SOURCE_DIR}/coprocessor_test.cc)
+target_link_libraries(Vcoprocessor PRIVATE PkgConfig::gtest_main)
+
+verilate(Vcoprocessor
+  VERILATOR_ARGS --timing --trace
+  SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/../coprocessor.v
+    ${CMAKE_CURRENT_SOURCE_DIR}/../rt_core.sv
+    ${CMAKE_CURRENT_SOURCE_DIR}/../rt_controller.sv
+    ${CMAKE_CURRENT_SOURCE_DIR}/../rt_rgu_5_stage.sv
+    ${fp_core_sources}
+    ${fp_vec_sources}
+  INCLUDE_DIRS
+    ${fp_core_includes}
+    ${fp_vec_includes}
+    ${rt_includes}
+  TOP_MODULE
+    coprocessor
+)
+
+add_test(
+  NAME Vcoprocessor
+  COMMAND $<TARGET_FILE:Vcoprocessor>
+)
