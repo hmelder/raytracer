@@ -22,22 +22,21 @@
 #include "main.hpp"
 #include "math/vec3.hpp"
 
-/*
 #define BUF_LEN 128
+
 struct state {
   // Current Position
-  int w;
-  int h;
-
-  sfp image_width;
-  sfp image_height;
+  ap_uint<15> w;
+  ap_uint<15> h;
+  ap_uint<15> image_width;
+  ap_uint<15> image_height;
   vec3<sfp> pixel_00_loc;
   vec3<sfp> pixel_delta_u;
   vec3<sfp> pixel_delta_v;
   vec3<sfp> camera_center;
-
   ap_uint<32> buffer[BUF_LEN];
   int valid_len;
+  bool done;
 };
 
 void compute(struct state &s) {
@@ -45,6 +44,7 @@ void compute(struct state &s) {
   int image_h = s.image_height;
 
   int count = 0;
+compute_loop:
   while (count < BUF_LEN && s.h < image_h) {
     ap_uint<32> value;
     auto pixel_center = s.pixel_00_loc + (sfp(s.w) * s.pixel_delta_u) +
@@ -54,6 +54,8 @@ void compute(struct state &s) {
     FIXED_2_RAW(ray_direction.y(), value);
     s.buffer[count++] = value;
 
+    s.done = (s.w == (image_w - 1)) && (s.h == (image_h - 1));
+
     if (s.w == image_w - 1) {
       s.w = 0;
       s.h += 1;
@@ -62,24 +64,17 @@ void compute(struct state &s) {
     }
   }
   s.valid_len = count;
-}*/
+}
 
 union cam_u {
   struct camera cam;
   uint32_t buf[CAMERA_STRUCT_LEN];
 };
 
-struct state {
-  ap_uint<15> image_width;
-  ap_uint<15> image_height;
-  vec3<sfp> pixel_00_loc;
-  vec3<sfp> pixel_delta_u;
-  vec3<sfp> pixel_delta_v;
-  vec3<sfp> camera_center;
-};
-
 struct state convert(struct camera &cam) {
   struct state s;
+  s.w = 0;
+  s.h = 0;
 
   sfp pixel_00_loc_fp[3], pixel_delta_u_fp[3], pixel_delta_v_fp[3],
       camera_center_fp[3];
@@ -124,17 +119,11 @@ recv_loop:
   struct state s = convert(cam.cam);
 
   pkt tmp;
-  ap_uint<15> w, h;
-send_outer:
-  for (int h = 0; h < s.image_height; h++) {
-  send_inner:
-    for (int w = 0; w < s.image_width; w++) {
-      auto pixel_center = s.pixel_00_loc + (sfp(w) * s.pixel_delta_u) +
-                          (sfp(h) * s.pixel_delta_v);
-      auto ray_direction = pixel_center - s.camera_center;
-      FIXED_2_RAW(ray_direction.y(), tmp.data);
-
-      tmp.last = (w == (s.image_width - 1) && (h == (s.image_height - 1)));
+  while (!s.done) {
+    compute(s);
+    for (int i = 0; i < s.valid_len; i++) {
+      tmp.data = s.buffer[i];
+      tmp.last = s.done;
       B.write(tmp);
     }
   }
