@@ -49,6 +49,39 @@ This is a 64x32 "path-traced" gradient with rays generated on the FPGA:
 - Gamma Correction
 - Lerp from  #7FB2FF to #FFFFFF
 
+#### Hardware Utilisation on the KV260
+
+Vivado 2024.2 Synthesis Report:
+```
+Report Cell Usage: 
++------+----------------+------+
+|      |Cell            |Count |
++------+----------------+------+
+|1     |BUFG            |     1|
+|2     |CARRY8          |    24|
+|3     |DSP_ALU         |     8|
+|4     |DSP_A_B_DATA    |     8|
+|6     |DSP_C_DATA      |     8|
+|7     |DSP_MULTIPLIER  |     8|
+|8     |DSP_M_DATA      |     8|
+|9     |DSP_OUTPUT      |     8|
+|10    |DSP_PREADD      |     8|
+|11    |DSP_PREADD_DATA |     8|
+|12    |LUT1            |     1|
+|13    |LUT2            |   175|
+|14    |LUT3            |    11|
+|15    |LUT4            |    19|
+|16    |LUT5            |    41|
+|17    |LUT6            |    35|
+|18    |FDCE            |   227|
+|19    |FDRE            |   174|
+|20    |FDSE            |     1|
+|21    |LD              |    35|
+|22    |IBUF            |    36|
+|23    |OBUF            |    35|
++------+----------------+------+
+```
+
 ## Building
 
 ### Dependencies
