@@ -13,6 +13,7 @@ module rt_rgu_tb;
 
   logic clk;  // Synchronous clock
   logic resetn;  // System reset, active low
+  logic stall = 0;
 
   // Clock Generation
   initial begin
@@ -110,6 +111,7 @@ module rt_rgu_tb;
       .clk(clk),
       .resetn(resetn),
       .start(start),
+      .stall(stall),
       .valid(valid),
       .pixel_00_loc(pixel_00_loc),
       .pixel_delta_u(pixel_delta_u),
