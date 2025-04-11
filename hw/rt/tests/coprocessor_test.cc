@@ -118,7 +118,7 @@ TEST_F(CoprocessorTest, Basic) {
                           (y * scene.pixel_delta_v);
       vec3 ray_direction = pixel_center - scene.camera_center;
 
-      EXPECT_NEAR(FIX_2_FLOAT(dut->m_axis_tdata), ray_direction[0], 0.0005);
+      EXPECT_NEAR(FIX_2_FLOAT(dut->m_axis_tdata), ray_direction[1], 0.00005);
 
       // Image Coordinate Handling
       if (x == image_width - 1 && y == image_height - 1) { // Done

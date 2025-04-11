@@ -30,7 +30,7 @@ module rt_core (
 
   // RGU Outputs
   sfp_if #(FP_IW, FP_QW) ray_origin[3] (), ray_direction[3] ();
-  assign pixel = ray_direction[0].val;  // FIXME: Temporary test
+  assign pixel = ray_direction[1].val;  // FIXME: Temporary test
 
 
   rt_controller controller (
