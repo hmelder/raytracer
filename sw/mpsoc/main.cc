@@ -152,7 +152,7 @@ int main() {
   u32 before_dma = XTmrCtr_GetValue(TmrCtrInstancePtr, TmrCtrNumber);
 
   size_t tx_len = SCENE_PAYLOAD_SIZE * 4;
-  size_t rx_len = int(scene.image_height) * int(scene.image_width);
+  size_t rx_len = int(scene.image_height) * int(scene.image_width) * 4;
   int rc = dma_transfer(tx_len, rx_len, DMA_DEV_ID);
 
   u32 after_dma = XTmrCtr_GetValue(TmrCtrInstancePtr, TmrCtrNumber);
