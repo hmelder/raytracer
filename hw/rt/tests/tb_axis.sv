@@ -66,8 +66,8 @@ module tb_axis;
   // Test Stimulus and Checking
   initial begin
     $display("Starting Testbench for 'raytracer_axis'");
-    $readmemh("camera.mem", config_mem);
-    $readmemh("pixels.mem", expected_pixels);
+    $readmemh("data/camera.mem", config_mem);
+    $readmemh("data/pixels.mem", expected_pixels);
     $dumpfile("tb_axis.vcd");
     $dumpvars(0, tb_axis);
 
