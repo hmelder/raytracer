@@ -1,4 +1,4 @@
-name: Libobjc2 CI
+name: Ray Tracer CI
 
 # Controls when the workflow will run
 on:
@@ -12,7 +12,6 @@ on:
 
 jobs:
   ubuntu:
-    strategy:
     runs-on: ubuntu-latest
     name: verilator-tests
     steps:
