@@ -33,6 +33,7 @@ All modules have a `tests` subdirectory with Verilator tests, and SystemVerilog 
 
 ### Next Steps
 
+- Reduce pipeline depth, by offloading more work onto the DSP
 - Implement a ray-object intersection unit
     - BVH tree traversal
 - Implement a shading unit
