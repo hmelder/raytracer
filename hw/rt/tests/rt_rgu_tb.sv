@@ -2,6 +2,9 @@
 // Copyright (c) 2025 Hugo Melder
 
 
+// NOTE: This test assumes that FP_IW = 14 and FP_QW = 18, which was changed during the development.
+// Change it back in hw/rt/parameters.vh before running this test
+
 `include "parameters.vh"
 
 module rt_rgu_tb;
@@ -88,23 +91,23 @@ module rt_rgu_tb;
     start = 1;
     //  Saturate pipeline
     for (int i = 0; i < 4; i++) begin
-        x = i << 18;
-        assert(valid == 0);
-        #(CLOCK_PERIOD);
+      x = i << 18;
+      assert (valid == 0);
+      #(CLOCK_PERIOD);
     end
     start = 0;
 
-      // Validation
-      for (int i = 0; i < 4; i++) begin
-        #(CLOCK_PERIOD);
-        assert(valid == 1);
-        // Check ray_direction
-        for (int j = 0; j < 3; j++) begin
-            assert(ray_direction[j] == expected[i][j]);
-        end
+    // Validation
+    for (int i = 0; i < 4; i++) begin
+      #(CLOCK_PERIOD);
+      assert (valid == 1);
+      // Check ray_direction
+      for (int j = 0; j < 3; j++) begin
+        assert (ray_direction[j] == expected[i][j]);
       end
-      
-      $finish;
+    end
+
+    $finish;
   end
 
   rt_rgu_wrapper dut (
