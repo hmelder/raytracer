@@ -34,25 +34,25 @@ struct state {
   vec3<sfp> pixel_delta_u;
   vec3<sfp> pixel_delta_v;
   vec3<sfp> camera_center;
-  ap_uint<32> buffer[BUF_LEN];
   int valid_len;
   bool done;
 };
 
-void compute(struct state &s) {
+void compute(struct state &s, ap_uint<32> *buffer) {
   int image_w = s.image_width;
   int image_h = s.image_height;
 
   int count = 0;
 compute_loop:
   while (count < BUF_LEN && s.h < image_h) {
+#pragma HLS pipeline
     ap_uint<32> value;
     auto pixel_center = s.pixel_00_loc + (sfp(s.w) * s.pixel_delta_u) +
                         (sfp(s.h) * s.pixel_delta_v);
     auto ray_direction = pixel_center - s.camera_center;
 
     FIXED_2_RAW(ray_direction.y(), value);
-    s.buffer[count++] = value;
+    buffer[count++] = value;
 
     s.done = (s.w == (image_w - 1)) && (s.h == (image_h - 1));
 
@@ -106,6 +106,9 @@ void myip_v1_0_HLS(hls::stream<pkt> &A, hls::stream<pkt> &B) {
 #pragma HLS INTERFACE axis port = A
 #pragma HLS INTERFACE axis port = B
 
+  ap_uint<32> buffer[BUF_LEN];
+#pragma HLS ARRAY_PARTITION variable = buffer complete
+
   union cam_u cam;
 
 recv_loop:
@@ -120,9 +123,9 @@ recv_loop:
 
   pkt tmp;
   while (!s.done) {
-    compute(s);
+    compute(s, buffer);
     for (int i = 0; i < s.valid_len; i++) {
-      tmp.data = s.buffer[i];
+      tmp.data = buffer[i];
       tmp.last = s.done;
       B.write(tmp);
     }
