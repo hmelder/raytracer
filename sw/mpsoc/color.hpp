@@ -36,7 +36,6 @@ rgb get_rgb(const color &pixel_color) {
   uint8_t gbyte = uint8_t(256 * intensity.clamp(g));
   uint8_t bbyte = uint8_t(256 * intensity.clamp(b));
 
-
   struct rgb s = {.r = rbyte, .g = gbyte, .b = bbyte};
   return s;
 }

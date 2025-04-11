@@ -23,9 +23,6 @@
   A[1] = B[1];                                                                 \
   A[2] = B[2];
 
-static const float aspect_ratio = 1.0f;
-
-
 class Scene {
 public:
   struct __attribute__((packed)) camera {
@@ -97,7 +94,7 @@ public:
 
     cam.aspect_ratio = FLOAT_2_FIX(aspect_ratio);
     cam.image_width = FLOAT_2_FIX(image_width);
-    cam.image_height = FLOAT_2_FIX(image_height); //image_height /= 2;
+    cam.image_height = FLOAT_2_FIX(image_height);
 
     cam.focal_length = FLOAT_2_FIX(focal_length);
     cam.viewport_height = FLOAT_2_FIX(viewport_height);
