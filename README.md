@@ -1,5 +1,7 @@
 # Raytracer
 
+[![Ray Tracer CI](https://github.com/hmelder/raytracer/actions/workflows/main.yaml/badge.svg)](https://github.com/hmelder/raytracer/actions/workflows/main.yaml)
+
 It all started, when I stumbled upon [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html), which is an excellent introduction to path tracing from the ground up.
 
 After a couple of hours, I had a parallelized software implementation mostly based on the algorithms provided in the book.
