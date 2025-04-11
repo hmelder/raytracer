@@ -10,7 +10,6 @@ module rt_rgu_wrapper (
 
     // Control Interface
     input  logic start,  // Start calculation for one ray
-    input  logic stall,
     output logic valid,  // Calculation finished, output is valid
 
     input logic [FP_WL-1:0] pixel_00_loc [3],
@@ -19,8 +18,8 @@ module rt_rgu_wrapper (
     input logic [FP_WL-1:0] camera_center[3],
 
     // Image Coordinates
-    input logic [COORDINATE_BITS-1:0] x,
-    input logic [COORDINATE_BITS-1:0] y,
+    input logic [FP_WL-1:0] x,
+    input logic [FP_WL-1:0] y,
 
     // Ray (Origin, Direction)
     output logic [FP_WL-1:0] ray_origin[3],
@@ -32,7 +31,7 @@ module rt_rgu_wrapper (
       .IW(FP_IW),
       .QW(FP_QW)
   )
-      ray_origin_fp[3] (), ray_direction_fp[3] ();
+      ray_origin_fp[3] (), ray_direction_fp[3] (), x_fp (), y_fp ();
 
   genvar i;
   generate
@@ -42,19 +41,21 @@ module rt_rgu_wrapper (
     end
   endgenerate
 
+  assign x_fp.val = x;
+  assign y_fp.val = y;
+
   // Instantiate ray generation unit
   rt_rgu_5_stage rgu (
       .clk(clk),
       .resetn(resetn),
       .start(start),
-      .stall(stall),
       .valid(valid),
       .pixel_00_loc(pixel_00_loc),
       .pixel_delta_u(pixel_delta_u),
       .pixel_delta_v(pixel_delta_v),
       .camera_center(camera_center),
-      .x(x),
-      .y(y),
+      .x(x_fp),
+      .y(y_fp),
       .ray_origin(ray_origin_fp),
       .ray_direction(ray_direction_fp)
   );

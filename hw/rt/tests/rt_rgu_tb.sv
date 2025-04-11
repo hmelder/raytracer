@@ -73,7 +73,7 @@ module rt_rgu_tb;
   initial begin
     $display("Starting Testbench for 'rt_rgu_5_stage'");
     $dumpfile("rt_rgu_tb.vcd");
-    $readmemh("expected.mem", expected);
+    $readmemh("rt_rgu_tb_expected.mem", expected);
     $dumpvars(0, rt_rgu_tb);
 
     #(CLOCK_HALF_PERIOD);  // to make inputs and capture from testbench not aligned with clock edges
@@ -87,23 +87,23 @@ module rt_rgu_tb;
     start = 1;
     //  Saturate pipeline
     for (int i = 0; i < 4; i++) begin
-      x = i << 18;
-      assert (valid == 0);
-      #(CLOCK_PERIOD);
+        x = i << 18;
+        assert(valid == 0);
+        #(CLOCK_PERIOD);
     end
     start = 0;
 
-    // Validation
-    for (int i = 0; i < 4; i++) begin
-      #(CLOCK_PERIOD);
-      assert (valid == 1);
-      // Check ray_direction
-      for (int j = 0; j < 3; j++) begin
-        assert (ray_direction[j] == expected[i][j]);
+      // Validation
+      for (int i = 0; i < 4; i++) begin
+        #(CLOCK_PERIOD);
+        assert(valid == 1);
+        // Check ray_direction
+        for (int j = 0; j < 3; j++) begin
+            assert(ray_direction[j] == expected[i][j]);
+        end
       end
-    end
-
-    $finish;
+      
+      $finish;
   end
 
   rt_rgu_wrapper dut (
